@@ -34,14 +34,12 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "POST" {
-		// http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		util.WriteError(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var receipt model.Receipt
 	if err := json.NewDecoder(r.Body).Decode(&receipt); err != nil {
-		// http.Error(w, "Bad request: invalid receipt format", http.StatusBadRequest)
 		util.WriteError(w, "Bad request: invalid receipt format", http.StatusBadRequest)
 		return
 	}
@@ -49,7 +47,6 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err := validation.ValidateReceipt(receipt); err != nil {
-		// http.Error(w, "Invalid receipt: "+err.Error(), http.StatusBadRequest)
 		util.WriteError(w, "Invalid receipt: " + err.Error(), http.StatusBadRequest)
         return
 	}
@@ -72,7 +69,6 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 
 	pathSegments := strings.Split(r.URL.Path, "/")
     if len(pathSegments) < 3 {
-        // http.Error(w, "Invalid path", http.StatusBadRequest)
 		util.WriteError(w, "Invalid path", http.StatusBadRequest)
         return
     }
@@ -80,7 +76,6 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 
 	receipt, exists := store.RetrieveReceipt(id)
 	if !exists {
-		// http.Error(w, "Not found: receipt ID does not exist", http.StatusNotFound)
 		util.WriteError(w, "Not found: receipt ID does not exist!", http.StatusNotFound)
 		return
 	}

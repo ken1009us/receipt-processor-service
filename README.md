@@ -118,7 +118,8 @@ This should return the calculated points in JSON format, such as:
 - main.go: Entry point for the web service.
 - handler/: Contains HTTP request handlers.
 - model/: Data models for receipts and items.
-- store/: In-memory storage and logic for receipts.
 - service/: Business logic for calculating points.
+- store/: In-memory storage and logic for receipts.
+- util/: Error handling and other utilities functions.
 - validation/: Validates the format of input files.
 - Dockerfile: Instructions for building the Docker image.

@@ -61,7 +61,7 @@ $ docker run -d --name myreceiptprocessor -p 8080:8080 receipt-processor-service
 
 This command creates and starts a new Docker container named myreceiptprocessor from the receipt-processor-service image. It runs the container in detached mode (in the background), and maps the container's port 8080 to the host's port 8080.
 
-5. Test the example files
+## Process the receipt
 
 1. To process a receipt, use the following curl command:
 

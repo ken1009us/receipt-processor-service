@@ -17,6 +17,8 @@ import (
 // ProcessReceipt  - POST /receipts/process
 func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("------Process Receipt------")
+
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
@@ -47,6 +49,7 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 // GetPoints - GET /receipts/{id}/points
 func GetPoints(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("------Retrieve Receipt------")
+	w.Header().Set("Content-Type", "application/json")
 	pathSegments := strings.Split(r.URL.Path, "/")
     if len(pathSegments) < 3 {
         http.Error(w, "Invalid path", http.StatusBadRequest)

@@ -4,21 +4,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"receipt-processor-service/model"
 	"receipt-processor-service/service"
 	"receipt-processor-service/store"
+	"receipt-processor-service/util"
 	"receipt-processor-service/validation"
 
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.New()
+
+func init() {
+	log.SetFormatter(&logrus.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(logrus.InfoLevel)
+}
 
 // ProcessReceipt  - POST /receipts/process
 func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("------Process Receipt------")
+	log.WithFields(logrus.Fields{
+        "method": r.Method,
+        "path":   r.URL.Path,
+    }).Info("Processing receipt")
 
 	w.Header().Set("Content-Type", "application/json")
+
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
@@ -39,8 +54,6 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 
 	id := uuid.New().String()
 	store.StoreReceipt(id, &receipt)
-	fmt.Printf("Stored receipt with ID: %s\n", id)
-    fmt.Printf("Receipt: %+v\n", receipt)
 
     json.NewEncoder(w).Encode(model.ReceiptResponse{ID: id})
 }
@@ -48,8 +61,13 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 
 // GetPoints - GET /receipts/{id}/points
 func GetPoints(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("------Retrieve Receipt------")
+	log.WithFields(logrus.Fields{
+        "method": r.Method,
+        "path":   r.URL.Path,
+    }).Info("Retrieving receipt")
+
 	w.Header().Set("Content-Type", "application/json")
+
 	pathSegments := strings.Split(r.URL.Path, "/")
     if len(pathSegments) < 3 {
         http.Error(w, "Invalid path", http.StatusBadRequest)

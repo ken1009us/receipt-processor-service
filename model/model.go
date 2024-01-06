@@ -6,7 +6,6 @@ type Receipt struct {
 	PurchaseTime string `json:"purchaseTime"`
 	Total string `json:"total"`
 	Items []Item `json:"items"`
-
 }
 
 type Item struct {
@@ -19,6 +18,5 @@ type ReceiptResponse struct {
 }
 
 type PointsResponse struct {
-	Points string `json:"points"`
+	Points int `json:"points"`
 }
-

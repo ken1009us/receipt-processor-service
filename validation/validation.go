@@ -18,10 +18,22 @@ func ValidateReceipt(receipt model.Receipt) error {
 		return errors.New("invalid purchase date format")
 	}
 
+	// Validate purchaseDate for logical correctness
+	_, err := time.Parse("2006-01-02", receipt.PurchaseDate)
+	if err != nil {
+		return errors.New("invalid purchase date: " + err.Error())
+	}
+
 	// Validate purchaseTime - format: "HH:MM"
 	timeRegex := regexp.MustCompile("^\\d{2}:\\d{2}$")
 	if !timeRegex.MatchString(receipt.PurchaseTime) {
 		return errors.New("invalid purchase time format")
+	}
+
+	// Validate purchaseTime for logical correctness
+	_, err = time.Parse("15:04", receipt.PurchaseTime)
+	if err != nil {
+		return errors.New("invalid purchase time: " + err.Error())
 	}
 
 	totalRegex := regexp.MustCompile("^\\d+\\.\\d{2}$")

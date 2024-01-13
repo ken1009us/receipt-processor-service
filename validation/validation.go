@@ -4,7 +4,40 @@ import (
 	"errors"
 	"receipt-processor-service/model"
 	"regexp"
+	"strconv"
+	"time"
 )
+
+func abs(x float64) float64 {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func ValidateReceiptTotal(receipt model.Receipt) error {
+	var sum float64 = 0
+	for _, item := range receipt.Items {
+		price, err := strconv.ParseFloat(item.Price, 64)
+		if err != nil {
+			return errors.New("invalid price format")
+		}
+
+		sum += price
+	}
+
+	receiptTotal, err := strconv.ParseFloat(receipt.Total, 64)
+    if err != nil {
+        return errors.New("invalid total format")
+    }
+
+	const t = 0.01
+	if abs(receiptTotal - sum) > t {
+        return errors.New("the sum of item prices does not match total")
+    }
+
+	return nil
+}
 
 func ValidateReceipt(receipt model.Receipt) error {
 	// Validate retailer - non-empty, no leading/trailing white spaces
@@ -39,6 +72,11 @@ func ValidateReceipt(receipt model.Receipt) error {
 	totalRegex := regexp.MustCompile("^\\d+\\.\\d{2}$")
 	if !totalRegex.MatchString(receipt.Total) {
 		return errors.New("invalid total format")
+	}
+
+	err = ValidateReceiptTotal(receipt)
+	if err != nil {
+		return errors.New("invalid receipt total and the sum of the items price: " + err.Error())
 	}
 
 	for _, item := range receipt.Items {

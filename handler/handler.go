@@ -53,8 +53,10 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 
 	id := uuid.New().String()
 	store.StoreReceipt(id, &receipt)
+	points := service.CalculatePoints(&receipt)
+	store.StorePoint(id, points)
 
-    json.NewEncoder(w).Encode(model.ReceiptResponse{ID: id})
+  json.NewEncoder(w).Encode(model.ReceiptResponse{ID: id})
 }
 
 
@@ -74,13 +76,12 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
     }
     id := pathSegments[2]
 
-	receipt, exists := store.RetrieveReceipt(id)
+	point, exists := store.RetrievePoint(id)
 	if !exists {
 		util.WriteError(w, "Not found: receipt ID does not exist!", http.StatusNotFound)
 		return
 	}
 
-	point := service.CalculatePoints(receipt)
 	json.NewEncoder(w).Encode(model.PointsResponse{Points: point})
 
 }

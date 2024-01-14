@@ -123,3 +123,62 @@ This should return the calculated points in JSON format, such as:
 - util/: Error handling and other utilities functions.
 - validation/: Validates the format of input files.
 - Dockerfile: Instructions for building the Docker image.
+
+## Improvements
+
+There is another way to handle the calculated points.
+
+### Extending the Receipt Struct:
+
+Advantages:
+- Cohesion: Integrates points directly with receipts, making the data model more intuitive and easier to understand.
+- Simplicity in Data Retrieval: Simplifies data access patterns, as points are directly associated with their respective receipts.
+- Database Storage: Easier to manage in a database, as each receipt row can include the points without requiring joins or additional lookups.
+
+Disadvantages:
+- Increased Data Payload: If there are scenarios where you need to access receipt data without points, you'll still be carrying the points data, which could be inefficient.
+- Potential for Redundant Calculations: If points calculations are complex and you store the calculated points with each receipt, you might end up recalculating points unnecessarily in some scenarios.
+
+In the model.go file:
+
+```go
+package model
+
+type Receipt struct {
+    // Existing fields...
+    Retailer       string `json:"retailer"`
+    PurchaseDate   string `json:"purchaseDate"`
+    PurchaseTime   string `json:"purchaseTime"`
+    Total          string `json:"total"`
+    Items          []Item `json:"items"`
+    // Add a new field for points
+    Points         int    `json:"points"`
+}
+
+```
+
+In the handler file:
+
+```go
+func ProcessReceipt(receipt *model.Receipt) {
+    // ...
+    // Calculate points
+    receipt.Points = service.CalculatePoints(receipt)
+
+    // Store the receipt with points
+    // ...
+}
+```
+
+Then we can use API endpoint to retrieve receipts.
+
+```go
+func GetReceipt(id string) (*model.Receipt, error) {
+    // ...
+    receipt, exists := store.RetrieveReceipt(id)
+    if !exists {
+        return nil, errors.New("receipt not found")
+    }
+    return receipt, nil
+}
+```

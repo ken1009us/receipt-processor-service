@@ -9,72 +9,79 @@ import (
 	"unicode"
 )
 
-
 func CalculatePoints(receipt *model.Receipt) int {
-    retailer := receipt.Retailer
-    purchaseDate := receipt.PurchaseDate
-    purchaseTime := receipt.PurchaseTime
-    total := receipt.Total
-    items := receipt.Items
-
     score := 0
 
-    // Rule 1 - One point for every alphanumeric character in the retailer name.
+    score += calculatePointsForRetailerName(receipt.Retailer)
+    score += calculatePointsForTotalAmount(receipt.Total)
+    score += calculatePointsPerItem(receipt.Items)
+    score += calculatePointsForPurchaseDate(receipt.PurchaseDate)
+    score += calculatePointsForPurchaseTime(receipt.PurchaseTime)
+
+    return score
+}
+
+func calculatePointsForRetailerName(retailer string) int {
+    points := 0
     for _, r := range retailer {
         if unicode.IsLetter(r) || unicode.IsNumber(r) {
-            score++
+            points++
         }
     }
+    return points
+}
 
-    // Rule 2 - 50 points if the total is a round dollar amount with no cents.
+func calculatePointsForTotalAmount(total string) int {
+    points := 0
     totalFloat, err := strconv.ParseFloat(total, 64)
     if err == nil {
         if totalFloat == float64(int(totalFloat)) {
-                score += 50
+            points += 50
         }
-
-        // Rule 3 - 25 points if the total is a multiple of 0.25
         if math.Mod(totalFloat, 0.25) == 0 {
-            score += 25
+            points += 25
         }
     }
+    return points
+}
 
-    // Rule 4 - 5 points for every two items on the receipt
-    numberOfItems := len(items)
-    // Op / will truncate any decimal part
-    score += (numberOfItems / 2) * 5
-
-    // Rule 5 - If the trimmed length of the item description is a multiple of 3,
-    // multiply the price by 0.2 and round up to the nearest integer.
-    // The result is the number of points earned
+func calculatePointsPerItem(items []model.Item) int {
+    points := len(items) / 2 * 5
     for _, item := range items {
-        shortDescription := strings.TrimSpace(item.ShortDescription)
-        if len(shortDescription)%3 == 0 {
-            price, err := strconv.ParseFloat(item.Price, 64)
-            if err == nil {
-                score += int(math.Ceil(price * 0.2))
-            }
+        points += calculatePointsForItemDescription(item.ShortDescription, item.Price)
+    }
+    return points
+}
+
+func calculatePointsForItemDescription(description, price string) int {
+    if len(strings.TrimSpace(description))%3 == 0 {
+        priceFloat, err := strconv.ParseFloat(price, 64)
+        if err == nil {
+            return int(math.Ceil(priceFloat * 0.2))
         }
     }
+    return 0
+}
 
-    // Rule 6 - 6 points if the day in the purchase date is odd
+func calculatePointsForPurchaseDate(purchaseDate string) int {
     dateParts := strings.Split(purchaseDate, "-")
     if len(dateParts) == 3 {
         day, err := strconv.Atoi(dateParts[2])
-        if err == nil && day % 2 != 0 {
-            score += 6
+        if err == nil && day%2 != 0 {
+            return 6
         }
     }
+    return 0
+}
 
-    // Rule 7 - 10 points if the time of purchase is after 2:00pm and before 4:00pm
+func calculatePointsForPurchaseTime(purchaseTime string) int {
     timeParts, err := time.Parse("15:04", purchaseTime)
     if err == nil {
         twoPM, _ := time.Parse("15:04", "14:00")
         fourPM, _ := time.Parse("15:04", "16:00")
         if timeParts.After(twoPM) && timeParts.Before(fourPM) {
-            score += 10
+            return 10
         }
     }
-
-    return score
+    return 0
 }

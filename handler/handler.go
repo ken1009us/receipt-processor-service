@@ -56,7 +56,7 @@ func ProcessReceipt(w http.ResponseWriter, r *http.Request) {
 	points := service.CalculatePoints(&receipt)
 	store.StorePoint(id, points)
 
-  json.NewEncoder(w).Encode(model.ReceiptResponse{ID: id})
+	json.NewEncoder(w).Encode(model.ReceiptResponse{ID: id})
 }
 
 
